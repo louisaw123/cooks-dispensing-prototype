@@ -36,24 +36,28 @@ if(!location.hash||location.hash==='#')history.replaceState(null,'','#/dispensar
 .ck-picon:disabled{cursor:default;opacity:.5}.ck-picon:disabled:hover{background:none}
 .ck-pname:focus-visible,.ck-picon:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 /* Edit patient dialog */
-.ck-edlg{border:0;border-radius:16px;padding:0;width:min(48rem,calc(100vw - 2rem));max-height:calc(100vh - 2rem);box-shadow:var(--shadow-4);color:var(--text-body);font:14px/1.5 var(--font-sans)}
+.ck-edlg{border:0;border-radius:16px;padding:0;width:min(78rem,calc(100vw - 2rem));max-height:calc(100vh - 2rem);box-shadow:var(--shadow-4);color:var(--text-body);font:14px/1.5 var(--font-sans)}
 .ck-edlg::backdrop{background:var(--overlay-scrim)}
 .ck-edlg form{display:flex;flex-direction:column;max-height:calc(100vh - 2rem)}
 .ck-ehead{display:flex;align-items:center;gap:.6rem;padding:1.1rem 1.5rem;border-bottom:1px solid var(--color-divider)}
 .ck-ehead h2{margin:0;font-size:18px;font-weight:600;color:var(--text-secondary)}
-.ck-ehead svg{color:var(--secondary-main)}
+.ck-ehead svg{color:var(--secondary-main);width:24px;height:24px}
 .ck-etabs{display:flex;justify-content:center;gap:1.25rem;border-bottom:1px solid var(--color-divider);margin:0 1rem}
 .ck-etabs button{border:0;background:none;font:500 13px var(--font-sans);color:var(--text-secondary);padding:.6rem .25rem;border-bottom:2px solid transparent;cursor:pointer}
 .ck-etabs button[aria-selected=true]{color:var(--primary-main);border-bottom-color:var(--primary-main)}
-.ck-ebody{padding:1.25rem 1.5rem;overflow:auto}
-.ck-egrid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
-.ck-egrid ._section_vz6x2_7{margin-bottom:1rem}
-.ck-ef{display:flex;flex-direction:column;gap:.375rem;margin-bottom:.75rem}
+.ck-ebody{padding:1.5rem;overflow:auto}
+.ck-egrid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+.ck-ecol{display:flex;flex-direction:column;gap:2rem}
+.ck-panel ._section_vz6x2_7{gap:.75rem}
+.ck-erow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.ck-ecompact .ck-ef input{width:10rem}
+.ck-help{color:var(--text-secondary);font-size:12px}
+.ck-ef{display:flex;flex-direction:column;gap:.375rem}
 .ck-ef label{font-weight:600;font-size:14px;line-height:1}
 .ck-ef input,.ck-ef select{height:2.5rem;border:1px solid var(--input-border);border-radius:var(--input-radius);padding:0 .75rem;font:inherit;background:var(--bg-white);color:var(--text-body);width:100%}
 .ck-ef input:focus,.ck-ef select:focus{outline:none;border-color:var(--secondary-main);box-shadow:var(--focus-ring)}
 .ck-ef input[readonly]{background:var(--bg-input);color:var(--text-secondary)}
-.ck-erow{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.ck-erow{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .ck-check{display:flex;align-items:center;gap:.5rem;font-weight:600}
 .ck-check input{width:1.1rem;height:1.1rem}
 .ck-efoot{display:flex;justify-content:flex-end;gap:.75rem;padding:1rem 1.5rem;border-top:1px solid var(--color-divider)}
@@ -277,40 +281,39 @@ function h(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k 
     var t1=h('button',{type:'button',role:'tab','aria-selected':'true',text:'Patient details'}),t2=h('button',{type:'button',role:'tab','aria-selected':'false',text:'Custom fields'});
     form.appendChild(h('div',{class:'ck-etabs',role:'tablist'},[t1,t2]));
     var body=h('div',{class:'ck-ebody'});form.appendChild(body);
-    function field(label,input,req){var id='ck-ed-'+label.replace(/\W+/g,'-').toLowerCase();input.id=id;return h('div',{class:'ck-ef'},[h('label',{for:id},[label,req?h('span',{class:'ck-req',text:'*'}):null]),input])}
+    // Same layout as the New patient form (2.4): panels for Patient details, Contact, Identifiers and Status
+    function field(label,input,req,help){var id='ck-ed-'+label.replace(/\W+/g,'-').toLowerCase();input.id=id;return h('div',{class:'ck-ef'},[h('label',{for:id},[label,req?h('span',{class:'ck-req',text:'*'}):null]),input,help?h('div',{class:'ck-help',text:help}):null])}
     function inp(v,attrs){var e=h('input',Object.assign({type:'text',autocomplete:'off'},attrs||{}));e.value=v==null?'':v;return e}
-    var first=inp(pt.firstName),last=inp(pt.lastName),dob=inp(pt.dateOfBirth,{type:'date'}),age=inp(ageFrom(pt.dateOfBirth),{readonly:''});
-    var gender=h('select',null,[['','Select…'],['FEMALE','Female'],['MALE','Male'],['NON_BINARY','Non-binary'],['TRANSGENDER','Transgender'],['UNKNOWN','Unknown']].map(function(g){var op=h('option',{value:g[0],text:g[1]});return op}));gender.value=pt.gender||'';
+    function panel(title,kids){return h('div',{class:'_panel_nmw0d_9 ck-panel'},[h('section',{class:'_section_vz6x2_7','data-heading':'group'},[h('h3',{class:'_heading_vz6x2_13',text:title})].concat(kids))])}
+    var first=inp(pt.firstName),last=inp(pt.lastName),dob=inp(pt.dateOfBirth,{type:'date'}),age=inp(ageFrom(pt.dateOfBirth),{inputmode:'numeric'});
+    var gender=h('select',null,[['','Select…'],['FEMALE','Female'],['MALE','Male'],['NON_BINARY','Non-binary'],['TRANSGENDER','Transgender'],['UNKNOWN','Unknown']].map(function(g){return h('option',{value:g[0],text:g[1]})}));gender.value=pt.gender||'';
     var addr=inp(pt.address1),phone=inp(pt.phone),kin=inp(pt.nextOfKinName),code=inp(pt.code),code2=inp(pt.code2);
-    var dead=h('input',{type:'checkbox',id:'ck-ed-deceased'});dead.checked=!!pt.isDeceased;
+    var dead=inp(pt.dateOfDeath||'',{type:'date'});
     dob.addEventListener('input',function(){age.value=ageFrom(dob.value)});
-    var left=h('div',null,[
-      h('section',{class:'_section_vz6x2_7','data-heading':'group'},[h('h3',{class:'_heading_vz6x2_13',text:'Patient details'}),
-        h('div',{class:'ck-erow'},[field('First name',first,true),field('Last name',last,true)]),
-        h('div',{class:'ck-erow'},[field('Date of birth',dob),field('Age',age)]),field('Gender',gender)]),
-      h('section',{class:'_section_vz6x2_7','data-heading':'group'},[h('h3',{class:'_heading_vz6x2_13',text:'Identifiers'}),
-        h('div',{class:'ck-erow'},[field('Code',code,true),field('National ID',code2)])])]);
-    var right=h('div',null,[
-      h('section',{class:'_section_vz6x2_7','data-heading':'group'},[h('h3',{class:'_heading_vz6x2_13',text:'Contact'}),field('Address',addr),h('div',{class:'ck-erow'},[field('Phone',phone),field('Next of kin',kin)])]),
-      h('section',{class:'_section_vz6x2_7','data-heading':'group'},[h('h3',{class:'_heading_vz6x2_13',text:'Status'}),h('label',{class:'ck-check',for:'ck-ed-deceased'},[dead,'Deceased'])])]);
+    // Entering an age sets the date of birth to 1 January of that year, as in the New patient form
+    age.addEventListener('input',function(){var a=parseInt(age.value.replace(/\D/g,''),10);if(isNaN(a)||a>150)return;dob.value=(new Date().getFullYear()-a)+'-01-01';});
+    var left=h('div',{class:'ck-ecol'},[
+      panel('Patient details',[h('div',{class:'ck-erow'},[field('First name',first,true),field('Last name',last,true)]),h('div',{class:'ck-erow3'},[field('Date of birth',dob),field('Age',age),field('Gender',gender)])]),
+      panel('Identifiers',[h('div',{class:'ck-erow'},[field('Code',code,true),field('National ID',code2)])])]);
+    var right=h('div',{class:'ck-ecol'},[
+      panel('Contact',[field('Address',addr),h('div',{class:'ck-erow'},[field('Phone',phone),field('Next of kin',kin)])]),
+      panel('Status',[h('div',{class:'ck-ecompact'},[field('Deceased',dead,false,'Date of death, if the patient has died')])])]);
     var details=h('div',{class:'ck-egrid'},[left,right]);
     var custom=h('p',{text:'No custom fields have been set up for patients.',style:'color:var(--text-secondary);margin:1rem 0'});custom.hidden=true;
     body.appendChild(details);body.appendChild(custom);
     t1.addEventListener('click',function(){t1.setAttribute('aria-selected','true');t2.setAttribute('aria-selected','false');details.hidden=false;custom.hidden=true});
     t2.addEventListener('click',function(){t2.setAttribute('aria-selected','true');t1.setAttribute('aria-selected','false');details.hidden=true;custom.hidden=false});
     var cancel=h('button',{type:'button',class:'_button_1h6xn_29','data-variant':'secondary','data-size':'medium',text:'Cancel'});
-    var view=h('button',{type:'button',class:'_button_1h6xn_29','data-variant':'secondary','data-size':'medium',text:'View patient'});
     var save=h('button',{type:'button',class:'_button_1h6xn_29','data-variant':'primary','data-size':'medium','data-testid':'edit-patient-save',text:'Save'});save.disabled=true;
-    form.appendChild(h('div',{class:'ck-efoot'},[cancel,view,save]));
+    form.appendChild(h('div',{class:'ck-efoot'},[cancel,save]));
     form.addEventListener('input',function(){save.disabled=!(first.value.trim()&&last.value.trim()&&code.value.trim())});
     form.addEventListener('change',function(){save.disabled=!(first.value.trim()&&last.value.trim()&&code.value.trim())});
     function close(){dlg.close();dlg.remove()}
     cancel.addEventListener('click',close);
-    view.addEventListener('click',function(){close();toast('<span>In Open mSupply this opens the patient\u2019s full record.</span>')});
     save.addEventListener('click',function(){
       pt.firstName=first.value.trim();pt.lastName=last.value.trim();pt.name=pt.lastName+', '+pt.firstName;
       pt.dateOfBirth=dob.value||null;pt.gender=gender.value||null;pt.address1=addr.value.trim();pt.phone=phone.value.trim();
-      pt.nextOfKinName=kin.value.trim()||null;pt.code=code.value.trim();pt.code2=code2.value.trim()||null;pt.isDeceased=dead.checked;
+      pt.nextOfKinName=kin.value.trim()||null;pt.code=code.value.trim();pt.code2=code2.value.trim()||null;pt.dateOfDeath=dead.value||null;pt.isDeceased=!!dead.value;
       close();onSaved&&onSaved();toast('<span class="ok">\u2713</span><span>Patient details saved.</span>');
     });
     dlg.addEventListener('cancel',function(ev){ev.preventDefault();close()});
